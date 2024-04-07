@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Windows.Input;
+using TrainingTaskApp.Services;
 using TrainingTaskApp.Models;
+using Windows.UI.Xaml.Controls;
+
 
 namespace TrainingTaskApp.ViewModels
 {
@@ -16,62 +16,72 @@ namespace TrainingTaskApp.ViewModels
         public ObservableCollection<Person> People { get; set; }
 
         public Person NewPerson { get; set; }
-        public string NewFirstName { get; set; }
-        public string NewLastName { get; set; }
+
+        public ICommand AddCommand { get; set; }
+        public ICommand EditCommand { get; set; }
+        public ICommand DeleteCommand { get; set; }
 
         public PersonViewModel()
         {
             People = new ObservableCollection<Person>();
             NewPerson = new Person();
             LoadData();
+
+            AddCommand = new RelayCommand(param => AddPerson(NewPerson.FirstName, NewPerson.LastName));
+            EditCommand = new RelayCommand(param => EditPerson(param as Person));
+            DeleteCommand = new RelayCommand(param => DeletePerson(param as Person));
         }
 
-        public void AddPerson(string firstName, string lastName)
+        public async void AddPerson(string firstName, string lastName)
         {
-            People.Add(new Person { FirstName = firstName, LastName = lastName });
-            SaveData();
-            NewPerson.FirstName = "";
-            NewPerson.LastName = "";
-            OnPropertyChanged(nameof(People));
-        }
-
-        public void EditPerson(Person person, string newFirstName, string newLastName)
-        {
-            person.FirstName = newFirstName;
-            person.LastName = newLastName;
-            SaveData();
-            OnPropertyChanged(nameof(People)); 
-        }
-
-
-        public void DeletePerson(Person person)
-        {
-            People.Remove(person);
-            SaveData();
-        }
-
-        private async Task SaveData()
-        {
-            string data = JsonConvert.SerializeObject(People);
-            var folder = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFolderAsync("Resources");
-            var file = await folder.CreateFileAsync("people.json", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-            await Windows.Storage.FileIO.WriteTextAsync(file, data);
-        }
-
-
-        private async Task LoadData()
-        {
-            var folder = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFolderAsync("Resources");
-            try
+            if (string.IsNullOrWhiteSpace(firstName) && string.IsNullOrWhiteSpace(lastName))
             {
-                var file = await folder.GetFileAsync("people.json");
-                string data = await Windows.Storage.FileIO.ReadTextAsync(file);
-                People = JsonConvert.DeserializeObject<ObservableCollection<Person>>(data);
+                ContentDialog emptyFieldsDialog = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = "FirstName and LastName couldn't be empty",
+                    CloseButtonText = "ОК"
+                };
+
+                ContentDialogResult result = await emptyFieldsDialog.ShowAsync();
             }
-            catch (FileNotFoundException)
+            else
             {
-                People = new ObservableCollection<Person>();
+                People.Add(new Person { FirstName = firstName, LastName = lastName });
+                await DataStorageService.SaveData(People);
+                OnPropertyChanged(nameof(People));
+
+                NewPerson.FirstName = string.Empty;
+                NewPerson.LastName = string.Empty;
+
+                OnPropertyChanged(nameof(NewPerson.FirstName));
+                OnPropertyChanged(nameof(NewPerson.LastName));
             }
+        }
+
+
+
+        public async void EditPerson(Person person)
+        {
+            if (person != null)
+            {
+                await DataStorageService.SaveData(People);
+                OnPropertyChanged(nameof(People));
+            }
+        }
+
+        public async void DeletePerson(Person person)
+        {
+            if (person != null)
+            {
+                People.Remove(person);
+                await DataStorageService.SaveData(People);
+            }
+        }
+
+        public async void LoadData()
+        {
+            People = await DataStorageService.LoadData();
         }
 
 
