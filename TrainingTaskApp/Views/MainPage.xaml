@@ -23,6 +23,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+                            
                             <TextBox Text="{Binding FirstName, Mode=TwoWay}" Margin="5" Grid.Column="0"/>
                             <TextBox Text="{Binding LastName, Mode=TwoWay}" Margin="5" Grid.Column="1"/>
                             <Button Content="Edit" Command="{Binding DataContext.EditCommand, ElementName=PersonListView}" CommandParameter="{Binding}" Grid.Column="2"/>
