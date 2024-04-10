@@ -1,16 +1,72 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace TrainingTaskApp.Models
 {
-    public class Person 
+    public class Person : INotifyPropertyChanged
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-    }
+        private bool isEditing;
+        private bool showEditButtons = true;
+        private string firstName;
+        private string lastName;
 
+        public string FirstName
+        {
+            get { return firstName; }
+            set
+            {
+                if (firstName != value)
+                {
+                    firstName = value;
+                    OnPropertyChanged(nameof(FirstName));
+                }
+            }
+        }
+
+        public string LastName
+        {
+            get { return lastName; }
+            set
+            {
+                if (lastName != value)
+                {
+                    lastName = value;
+                    OnPropertyChanged(nameof(LastName));
+                }
+            }
+        }
+
+        public bool IsEditing
+        {
+            get { return isEditing; }
+            set
+            {
+                if (isEditing != value)
+                {
+                    isEditing = value;
+                    OnPropertyChanged(nameof(IsEditing));
+                    OnPropertyChanged(nameof(ShowEditButtons));
+                }
+            }
+        }
+
+        public bool ShowEditButtons
+        {
+            get { return !isEditing; }
+            set
+            {
+                if (showEditButtons != value)
+                {
+                    showEditButtons = value;
+                    OnPropertyChanged(nameof(ShowEditButtons));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 }
