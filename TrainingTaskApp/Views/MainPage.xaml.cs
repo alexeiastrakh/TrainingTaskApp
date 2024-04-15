@@ -1,5 +1,6 @@
 ﻿using Windows.UI.Xaml.Controls;
 using TrainingTaskApp.ViewModels;
+using Windows.UI.Xaml;
 
 namespace TrainingTaskApp
 {
@@ -8,7 +9,7 @@ namespace TrainingTaskApp
         public MainPage()
         {
             InitializeComponent();
-            DataContext = new PersonViewModel();
+            DataContext = Application.Current.Resources["PersonViewModel"];
         }
     }
 }

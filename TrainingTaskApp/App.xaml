@@ -2,6 +2,11 @@
     x:Class="TrainingTaskApp.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:TrainingTaskApp">
-
+    xmlns:local="using:TrainingTaskApp"
+    xmlns:viewModels="using:TrainingTaskApp.ViewModels">
+    <Application.Resources>
+        <ResourceDictionary>
+            <viewModels:PersonViewModel x:Key="PersonViewModel" />
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

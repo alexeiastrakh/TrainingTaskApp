@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
+using TrainingTaskApp.Helpers;
 
 namespace TrainingTaskApp.Models
 {
-    public class Person : INotifyPropertyChanged
+    public class Person : ObservableObject
     {
         private bool isEditing;
         private bool showEditButtons = true;
@@ -17,7 +18,7 @@ namespace TrainingTaskApp.Models
                 if (firstName != value)
                 {
                     firstName = value;
-                    OnPropertyChanged(nameof(FirstName));
+                    NotifyPropertyChanged(nameof(FirstName));
                 }
             }
         }
@@ -30,7 +31,7 @@ namespace TrainingTaskApp.Models
                 if (lastName != value)
                 {
                     lastName = value;
-                    OnPropertyChanged(nameof(LastName));
+                    NotifyPropertyChanged(nameof(LastName));
                 }
             }
         }
@@ -43,8 +44,8 @@ namespace TrainingTaskApp.Models
                 if (isEditing != value)
                 {
                     isEditing = value;
-                    OnPropertyChanged(nameof(IsEditing));
-                    OnPropertyChanged(nameof(ShowEditButtons));
+                    NotifyPropertyChanged(nameof(IsEditing));
+                    NotifyPropertyChanged(nameof(ShowEditButtons));
                 }
             }
         }
@@ -57,16 +58,12 @@ namespace TrainingTaskApp.Models
                 if (showEditButtons != value)
                 {
                     showEditButtons = value;
-                    OnPropertyChanged(nameof(ShowEditButtons));
+                    NotifyPropertyChanged(nameof(ShowEditButtons));
                 }
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

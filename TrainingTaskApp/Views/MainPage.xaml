@@ -3,46 +3,77 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:TrainingTaskApp"
-    xmlns:services="using:TrainingTaskApp.Services"
+    xmlns:viewModel="using:TrainingTaskApp.ViewModels" 
+    xmlns:services="using:TrainingTaskApp.Services" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
     <Page.Resources>
         <services:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
+    <Page.DataContext>
+        <viewModel:PersonViewModel/>
+    </Page.DataContext>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <StackPanel Margin="20" Grid.Row="0">
+        <StackPanel Margin="20">
             <TextBox x:Name="FirstNameTextBox" PlaceholderText="Enter first name" Text="{Binding NewPerson.FirstName, Mode=TwoWay}"/>
             <TextBox x:Name="LastNameTextBox" PlaceholderText="Enter last name" Text="{Binding NewPerson.LastName, Mode=TwoWay}"/>
             <Button Content="Add Person" Command="{Binding AddCommand}"/>
+            <controls:DataGrid x:Name="PersonDataGrid" ItemsSource="{Binding People}" AutoGenerateColumns="False">
+                <controls:DataGrid.Columns>
+                    <controls:DataGridTemplateColumn Header="First Name">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBox Text="{Binding FirstName, Mode=TwoWay}" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <TextBlock Text="{Binding FirstName}" Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <controls:DataGridTemplateColumn Header="Last Name">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBox Text="{Binding LastName, Mode=TwoWay}" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <TextBlock Text="{Binding LastName}" Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+
+                    <controls:DataGridTemplateColumn Header="Actions">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">                                    <Button Content="Edit" 
+                                     Command="{Binding EditCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                    <Button x:Name="SaveButton" 
+                                     Content="Save" 
+                                     Command="{Binding SaveCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+
+                                    <Button x:Name="CancelButton" 
+                                     Content="Cancel" 
+                                     Command="{Binding CancelCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+
+                                    <Button x:Name="Delete" 
+                                     Content="Delete" 
+                                     Command="{Binding DeleteCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" />                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
         </StackPanel>
-        <ListView x:Name="PersonListView" ItemsSource="{Binding People}" Grid.Row="1">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox Text="{Binding FirstName, Mode=TwoWay}" Margin="5" Grid.Column="0" IsEnabled="{Binding IsEditing}" />
-                        <TextBox Text="{Binding LastName, Mode=TwoWay}" Margin="5" Grid.Column="1" IsEnabled="{Binding IsEditing}" />
-                        <Button Content="Edit" Command="{Binding DataContext.EditCommand, ElementName=PersonListView}" CommandParameter="{Binding}" Grid.Column="3" Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                        <Button x:Name="SaveButton" Content="Save" Command="{Binding DataContext.SaveCommand, ElementName=PersonListView}" CommandParameter="{Binding}" Grid.Column="3" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
-                        <Button x:Name="CancelButton" Content="Cancel" Command="{Binding DataContext.CancelCommand, ElementName=PersonListView}" CommandParameter="{Binding}" Grid.Column="4" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
-                        <Button x:Name="Delete" Content="Delete" Command="{Binding DataContext.DeleteCommand, ElementName=PersonListView}" CommandParameter="{Binding}" Grid.Column="2"/>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
     </Grid>
 </Page>
