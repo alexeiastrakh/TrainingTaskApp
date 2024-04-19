@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using TrainingTaskApp.Helpers;
+using TrainingTaskApp.Infrastructure.Command;
 using TrainingTaskApp.Models;
 using TrainingTaskApp.Services;
 using Windows.UI.Xaml.Controls;
@@ -13,23 +15,20 @@ namespace TrainingTaskApp.ViewModels
 {
     public class PersonViewModel : ObservableObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public ObservableCollection<Person> People { get; set; }
+        public ObservableCollection<PersonUIWrapper> People { get; set; }
 
         public Person NewPerson { get; set; }
 
-        private Person originalPerson;
+        private PersonUIWrapper originalPerson;
         public ICommand AddCommand { get; set; }
         public ICommand EditCommand { get; set; }
         public ICommand DeleteCommand { get; set; }
         public ICommand SaveCommand { get; set; }
         public ICommand CancelCommand { get; set; }
 
-
         public PersonViewModel()
         {
-            People = new ObservableCollection<Person>();
+            People = new ObservableCollection<PersonUIWrapper>();
             NewPerson = new Person();
             LoadData();
 
@@ -40,7 +39,6 @@ namespace TrainingTaskApp.ViewModels
             CancelCommand = new RelayCommand(param => CancelChanges(param));
         }
 
-
         public async void AddPerson(string firstName, string lastName)
         {
             ContentDialog dialog = null;
@@ -50,16 +48,17 @@ namespace TrainingTaskApp.ViewModels
                 {
                     Title = "Error",
                     Content = "FirstName and LastName couldn't be empty",
-                    CloseButtonText = "ОК"
+                    CloseButtonText = "OK"
                 };
             }
             else
             {
                 if (People == null)
-                    People = new ObservableCollection<Person>();
-                People.Add(new Person { FirstName = firstName, LastName = lastName });
-                await DataStorageService.SaveData(People);
-                NotifyPropertyChanged(nameof(People));
+                    People = new ObservableCollection<PersonUIWrapper>();
+                var newPerson = new Person { FirstName = firstName, LastName = lastName };
+                People.Add(new PersonUIWrapper { Person = newPerson });
+                var people = new ObservableCollection<Person>(People.Select(p => p.Person));
+                await DataStorageService.SaveData(people);
 
                 NewPerson.FirstName = string.Empty;
                 NewPerson.LastName = string.Empty;
@@ -69,17 +68,15 @@ namespace TrainingTaskApp.ViewModels
                 await dialog.ShowAsync();
         }
 
-
-
         public void EditPerson(object parameter)
         {
-            Person person = (Person)parameter;
-            if (person != null)
+            PersonUIWrapper personWrapper = (PersonUIWrapper)parameter;
+            if (personWrapper != null)
             {
-                originalPerson = new Person { FirstName = person.FirstName, LastName = person.LastName };
+                originalPerson = new PersonUIWrapper { Person = new Person { FirstName = personWrapper.Person.FirstName, LastName = personWrapper.Person.LastName } };
                 foreach (var p in People)
                 {
-                    if (p == person)
+                    if (p == personWrapper)
                     {
                         p.IsEditing = true;
                         p.ShowEditButtons = false;
@@ -93,11 +90,10 @@ namespace TrainingTaskApp.ViewModels
             }
         }
 
-
         public async Task DeletePerson(object parameter)
         {
-            Person person = (Person)parameter;
-            if (person != null)
+            PersonUIWrapper personWrapper = (PersonUIWrapper)parameter;
+            if (personWrapper != null)
             {
                 ContentDialog deleteConfirmationDialog = new ContentDialog
                 {
@@ -111,38 +107,34 @@ namespace TrainingTaskApp.ViewModels
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    People.Remove(person);
-                    await DataStorageService.SaveData(People);
+                    People.Remove(personWrapper);
+                    var people = new ObservableCollection<Person>(People.Select(p => p.Person));
+                    await DataStorageService.SaveData(people);
                 }
             }
         }
 
         public async Task SaveChanges(object parameter)
         {
-            Person person = (Person)parameter;
-            if (person != null)
+            PersonUIWrapper personWrapper = (PersonUIWrapper)parameter;
+            if (personWrapper != null)
             {
-                await DataStorageService.SaveData(People);
-                NotifyPropertyChanged(nameof(People));
-                person.IsEditing = false;
-                person.ShowEditButtons = true;
+                var people = new ObservableCollection<Person>(People.Select(p => p.Person));
+                await DataStorageService.SaveData(people);
+                personWrapper.IsEditing = false;
+                personWrapper.ShowEditButtons = true;
             }
         }
 
         public async Task CancelChanges(object parameter)
         {
-            Person person = (Person)parameter;
-            if (person != null && originalPerson != null)
+            PersonUIWrapper personWrapper = (PersonUIWrapper)parameter;
+            if (personWrapper != null && originalPerson != null)
             {
-                person.FirstName = originalPerson.FirstName;
-                person.LastName = originalPerson.LastName;
-                person.IsEditing = false;
-
-                NotifyPropertyChanged(nameof(person.FirstName));
-                NotifyPropertyChanged(nameof(person.LastName));
-                NotifyPropertyChanged(nameof(person.IsEditing));
-
-                person.ShowEditButtons = true;
+                personWrapper.Person.FirstName = originalPerson.Person.FirstName;
+                personWrapper.Person.LastName = originalPerson.Person.LastName;
+                personWrapper.IsEditing = false;
+                personWrapper.ShowEditButtons = true;
 
                 ContentDialog cancelDialog = new ContentDialog
                 {
@@ -155,7 +147,6 @@ namespace TrainingTaskApp.ViewModels
             }
         }
 
-
         public async Task LoadData()
         {
             var loadedPeople = await DataStorageService.LoadData();
@@ -163,13 +154,15 @@ namespace TrainingTaskApp.ViewModels
             {
                 foreach (var person in loadedPeople)
                 {
-                    person.IsEditing = false;
-                    person.ShowEditButtons = true;
-                    People.Add(person);
+                    PersonUIWrapper personWrapper = new PersonUIWrapper
+                    {
+                        Person = person,
+                        IsEditing = false,
+                        ShowEditButtons = true
+                    };
+                    People.Add(personWrapper);
                 }
             }
         }
-
     }
-
 }

@@ -5,8 +5,6 @@ namespace TrainingTaskApp.Models
 {
     public class Person : ObservableObject
     {
-        private bool isEditing;
-        private bool showEditButtons = true;
         private string firstName;
         private string lastName;
 
@@ -18,7 +16,7 @@ namespace TrainingTaskApp.Models
                 if (firstName != value)
                 {
                     firstName = value;
-                    NotifyPropertyChanged(nameof(FirstName));
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -31,39 +29,10 @@ namespace TrainingTaskApp.Models
                 if (lastName != value)
                 {
                     lastName = value;
-                    NotifyPropertyChanged(nameof(LastName));
+                    NotifyPropertyChanged();
                 }
             }
         }
-
-        public bool IsEditing
-        {
-            get { return isEditing; }
-            set
-            {
-                if (isEditing != value)
-                {
-                    isEditing = value;
-                    NotifyPropertyChanged(nameof(IsEditing));
-                    NotifyPropertyChanged(nameof(ShowEditButtons));
-                }
-            }
-        }
-
-        public bool ShowEditButtons
-        {
-            get { return !isEditing; }
-            set
-            {
-                if (showEditButtons != value)
-                {
-                    showEditButtons = value;
-                    NotifyPropertyChanged(nameof(ShowEditButtons));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
     }
 }

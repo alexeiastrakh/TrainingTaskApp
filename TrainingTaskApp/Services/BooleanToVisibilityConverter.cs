@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Data;
 
 namespace TrainingTaskApp.Services
 {
@@ -12,21 +8,12 @@ namespace TrainingTaskApp.Services
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is bool booleanValue)
-            {
-                return booleanValue ? Visibility.Visible : Visibility.Collapsed;
-            }
-            return Visibility.Collapsed;
+            return value is bool booleanValue ? (booleanValue ? Visibility.Visible : Visibility.Collapsed) : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            if (value is Visibility visibilityValue)
-            {
-                return visibilityValue == Visibility.Visible;
-            }
-            return false;
+            return value is Visibility visibilityValue ? (visibilityValue == Visibility.Visible) : false;
         }
     }
-
 }
