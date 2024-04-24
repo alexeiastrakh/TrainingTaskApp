@@ -3,11 +3,12 @@ using TrainingTaskApp.Models;
 
 namespace TrainingTaskApp.Helpers
 {
-    public class PersonUIWrapper : ObservableObject
+    public class PersonUIWrapper : ObservableObject, IEditableObject
     {
         private bool isEditing;
         private bool showEditButtons = true;
         private Person person;
+        private Person backupPerson;
 
         public Person Person
         {
@@ -17,6 +18,7 @@ namespace TrainingTaskApp.Helpers
                 if (person != value)
                 {
                     person = value;
+                    NotifyPropertyChanged();
                 }
             }
         }
@@ -45,6 +47,35 @@ namespace TrainingTaskApp.Helpers
                     showEditButtons = value;
                     NotifyPropertyChanged();
                 }
+            }
+        }
+
+        public void BeginEdit()
+        {
+            if (!isEditing)
+            {
+                backupPerson = new Person { FirstName = person.FirstName, LastName = person.LastName };
+                IsEditing = true;
+            }
+        }
+
+        public void EndEdit()
+        {
+            if (isEditing)
+            {
+                backupPerson = null;
+                IsEditing = false;
+                ShowEditButtons = true;
+            }
+        }
+
+        public void CancelEdit()
+        {
+            if (isEditing && backupPerson != null)
+            {
+                person.FirstName = backupPerson.FirstName;
+                person.LastName = backupPerson.LastName;
+                EndEdit();
             }
         }
     }
