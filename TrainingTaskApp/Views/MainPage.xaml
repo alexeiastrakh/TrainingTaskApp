@@ -13,9 +13,6 @@
     <Page.Resources>
         <services:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
-    <Page.DataContext>
-        <viewModel:PersonViewModel/>
-    </Page.DataContext>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel Margin="20">
             <TextBox x:Name="FirstNameTextBox" PlaceholderText="Enter first name" Text="{Binding NewPerson.FirstName, Mode=TwoWay}"/>
@@ -23,32 +20,16 @@
             <Button Content="Add Person" Command="{Binding AddCommand}"/>
             <controls:DataGrid x:Name="PersonDataGrid" ItemsSource="{Binding People}" AutoGenerateColumns="False">
                 <controls:DataGrid.Columns>
-                    <controls:DataGridTemplateColumn Header="First Name">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBox Text="{Binding Person.FirstName, Mode=TwoWay}" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <TextBlock Text="{Binding Person.FirstName}" Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
 
-                    <controls:DataGridTemplateColumn Header="Last Name">
+                    <controls:DataGridTemplateColumn Header="Name and Actions">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel>
-                                    <TextBox Text="{Binding Person.LastName, Mode=TwoWay}" Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <TextBlock Text="{Binding Person.LastName}" Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
+                                
+                                <StackPanel Orientation="Horizontal">
 
-                    <controls:DataGridTemplateColumn Header="Actions">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">                                    <Button Content="Edit" 
+                                    <TextBlock Text="{Binding Person.FirstName}" Width="100" />
+                                    <TextBlock Text="{Binding Person.LastName}" Width="100" />
+                                    <Button Content="Edit" 
                                      Command="{Binding EditCommand, Source={StaticResource PersonViewModel}}" 
                                      CommandParameter="{Binding}" 
                                      Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -68,10 +49,43 @@
                                     <Button x:Name="Delete" 
                                      Content="Delete" 
                                      Command="{Binding DeleteCommand, Source={StaticResource PersonViewModel}}" 
-                                     CommandParameter="{Binding}" />                                </StackPanel>
+                                     CommandParameter="{Binding}" />
+                                </StackPanel>
+
                             </DataTemplate>
                         </controls:DataGridTemplateColumn.CellTemplate>
+                        <controls:DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox Text="{Binding Person.FirstName,Mode=TwoWay}" Width="100" />
+                                    <TextBox Text="{Binding Person.LastName,Mode=TwoWay}" Width="100" />
+
+                                    <Button Content="Edit" 
+                                     Command="{Binding EditCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding ShowEditButtons, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                    <Button x:Name="SaveButton" 
+                                     Content="Save" 
+                                     Command="{Binding SaveCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+
+                                    <Button x:Name="CancelButton" 
+                                     Content="Cancel" 
+                                     Command="{Binding CancelCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" 
+                                     Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}" />
+
+                                    <Button x:Name="Delete" 
+                                     Content="Delete" 
+                                     Command="{Binding DeleteCommand, Source={StaticResource PersonViewModel}}" 
+                                     CommandParameter="{Binding}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellEditingTemplate>
                     </controls:DataGridTemplateColumn>
+
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
         </StackPanel>
